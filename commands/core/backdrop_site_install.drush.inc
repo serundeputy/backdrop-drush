@@ -56,6 +56,8 @@ function backdrop_site_install_drush_callback($arguments = 'standard', $options 
     'locale' => drush_get_option('Locale', 'en'),
     'site-mail' => drush_get_option('site-mail', 'admin@example.com'),
     'root' => drush_get_option('root', ''),
+//    'user' => drush_get_option('user', ''),
+//    'database' => drush_get_option('database', ''),
   );
 
   $additional_form_options = array();
@@ -97,7 +99,7 @@ function backdrop_site_install_drush_callback($arguments = 'standard', $options 
     $url['pass'] = drush_prompt("\t\033[94mDatabase password\033[0m");
     $url['host'] = drush_prompt("\t\033[94mDatabase host\033[0m", 'localhost');
     $url['port'] = drush_prompt("\t\033[94mDatabase port\033[0m", '3306');
-    //$options['prefix'] = drush_prompt("\tdriver: ");
+    //$options['prefix'] = drush_prompt("\t[94mprefix: ");
     $options['database'] = drush_prompt("\t\033[94mDatabase name\033[0m");
     drush_print_r("\033[0m\n");
   }
@@ -160,7 +162,6 @@ function backdrop_site_install_drush_callback($arguments = 'standard', $options 
   require_once './core/includes/install.core.inc';
 
   try {
-    //render_text(array('value' => "Installing Backdrop. This may take a moment...", '#color' => 'bold_blue'));
     drush_print_r("\t" . dt("Installing Backdrop. This may take a moment...") . "\n\n");
     install_backdrop($settings);
     drush_print_r(dt("\t\033[92mBackdrop installed successfully.\033[0m\n"));
