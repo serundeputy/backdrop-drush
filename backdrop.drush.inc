@@ -61,6 +61,8 @@ function backdrop_drush_command_alter(&$command) {
       break;
     case 'site-install':
       $backdrop_command = 'backdrop-site-install';
+    case 'user-password':
+      $backdrop_command = 'backdrop-user-password';
       break;
   }
 
@@ -81,6 +83,7 @@ function backdrop_drush_command_alter(&$command) {
     'sql-dump',
     'sql-query',
     'sql-sanitize',
+    'release-notes',
   );
 
   $compatible_commands = array(
