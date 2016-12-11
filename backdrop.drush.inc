@@ -62,9 +62,12 @@ function backdrop_drush_command_alter(&$command) {
     case 'pm-enable':
       $backdrop_command = 'backdrop-pm-enable';
       break;
-      case 'pm-disable':
-        $backdrop_command = 'backdrop-pm-disable';
-        break;
+    case 'pm-disable':
+      $backdrop_command = 'backdrop-pm-disable';
+      break;
+    case 'site-install':
+      $backdrop_command = 'backdrop-site-install';
+      break;
     case 'user-password':
       $backdrop_command = 'backdrop-user-password';
       break;
