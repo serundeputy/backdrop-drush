@@ -77,6 +77,8 @@ function backdrop_drush_command_alter(&$command) {
     case 'config-import':
     case 'backdrop-config-import':
       $backdrop_command = 'backdrop-config-import';
+    case 'fix-permission':
+      $backdrop_command = 'fix-permissions';
       break;
   }
 
