@@ -308,7 +308,8 @@ function backdrop_command_pm_update() {
         if ($answer == 'y' || $answer == 'yes') {
           $users_home_directory = $_SERVER['HOME'];
           $site_name = strtolower(str_replace(' ', '_', config_get('system.core', 'site_name')));
-          drush_print_r("\tBacking up current core folder to $users_home_directory/.drush/$site_name-core-$current_version");
+          $timestamp = date_timestamp_get(date_create());
+          drush_print_r("\tBacking up current core folder to $users_home_directory/drush-backups/$site_name/$timestamp/core-$current_version");
           exec("mkdir -p $users_home_directory/.drush/drush-tmp");
           if (!file_exists("$users_home_directory/.drush/drush-tmp/")) {
             drush_print_r("\t\e[31mFailed\e[0m: The drush-tmp directory could not be created.\n\n");
@@ -321,7 +322,8 @@ function backdrop_command_pm_update() {
           }
           if (file_exists("$users_home_directory/.drush/drush-tmp/backdrop")) {
             // Backup current core directory.
-            exec("mv $backdrop_root/core $users_home_directory/.drush/$site_name-core-$current_version");
+            exec("mkdir -p $users_home_directory/drush-backups/$site_name/$timestamp/");
+            exec("mv $backdrop_root/core $users_home_directory/drush-backups/$site_name/$timestamp/core-$current_version");
             exec("mv $users_home_directory/.drush/drush-tmp/backdrop/core $backdrop_root/core");
             exec("rm -r $users_home_directory/.drush/drush-tmp");
           }
@@ -362,11 +364,20 @@ function backdrop_command_pm_update() {
             $module_version_raw = $i;
           }
         }
+        if (!$module_version_raw) {
+          drush_print_r("\tCurrent module version of \033[1m$project\033[0m could not be determined.");
+          drush_print_r("\tThis is usually because the module doesn't have and official release.");
+        }
         $module_version_arr = explode(' = ', $module_version_raw);
         $module_full_version = trim($module_version_arr[1]);
-        $module_sem_version_arr = explode('-', $module_version_arr[1]);
-        $module_sem_version = trim($module_sem_version_arr[1]);
-        $module_core_compat = trim($module_sem_version_arr[0]);
+        if (strpos($module_full_version, '-') !== FALSE) {
+          $module_sem_version_arr = explode('-', $module_version_arr[1]);
+          $module_sem_version = trim($module_sem_version_arr[1]);
+          $module_core_compat = trim($module_sem_version_arr[0]);
+        }
+        else {
+           $module_sem_version = $module_full_version;
+        }
         $module_sem_version_parts = explode('.', $module_sem_version);
         $module_version_major = $module_sem_version_parts[0];
         $module_version_minor = $module_sem_version_parts[1];
@@ -379,12 +390,18 @@ function backdrop_command_pm_update() {
         $proposed_version_minor = $xml->releases->release->version_minor;
         $proposed_version_patch = $xml->releases->release->version_patch;
 
+        // Check if proposed version has prepended Backrop compatibility string.
+        if (strpos($proposed_version, "-") !== FALSE) {
+          $proposed_version_array = explode('-', $proposed_version);
+          $proposed_version = $proposed_version_array[1];
+        }
+
         if (empty($proposed_version)) {
           drush_print_r("\tThere are no official releases for \033[1m$project\033[0m.
           Upgrading is not possible.
           ");
         }
-        elseif ($module_full_version == $proposed_version) {
+        elseif ($module_sem_version == $proposed_version) {
           drush_print_r("\n\t\tProject \033[1m$project\033[0m is up to date :).\n");
         }
         elseif (
@@ -404,16 +421,18 @@ function backdrop_command_pm_update() {
           modifications made to \033[1m$project\033[0m files.  If you have made any
           modifications to these files, please back them up before updating so that
           you can re-create your modifications in the updated version of the file.\n\n");
-          drush_print_r("\tNote: Updating modules can potentially break your site.
-          It is NOT recommended to update production sites without prior testing.\n\n");
+          drush_print_r("\tNote: Updating modules can potentially break your site.");
+          drush_print_r("\tIt is NOT recommended to update production sites without prior testing.\n\n");
           $answer = drush_prompt("\t\e[34mDo you wish to continue?\e[0m (y or n)");
           $answer = strtolower($answer);
           if ($answer == 'y' || $answer == 'yes') {
             $users_home_directory = $_SERVER['HOME'];
-            $site_name = config_get('system.core', 'site_name');
+            $site_name = strtolower(str_replace(' ', '_', config_get('system.core', 'site_name')));
+            $timestamp = date_timestamp_get(date_create());
+            exec("mkdir -p $users_home_directory/drush-backups/$site_name/$timestamp/modules/");
             drush_print_r("\t Backing up current \033[1m$project\033[0m folder to
-            $users_home_directory/.drush/$site_name-$project-$module_full_version");
-            exec("mv $module_path/$project $users_home_directory/.drush/$site_name-$project-$module_full_version");
+            $users_home_directory/drush-backups/$site_name/$timestamp/modules/$project-$module_full_version");
+            exec("mv $module_path/$project $users_home_directory/drush-backups/$site_name/$timestamp/modules/$project-$module_full_version");
             exec("mkdir -p $users_home_directory/.drush/drush-tmp");
             exec("wget --quiet -O $users_home_directory/.drush/drush-tmp/$project.zip $download_link");
             exec("unzip $users_home_directory/.drush/drush-tmp/$project.zip -d $users_home_directory/.drush/drush-tmp");
@@ -422,9 +441,9 @@ function backdrop_command_pm_update() {
             }
             exec("mv $users_home_directory/.drush/drush-tmp/$project $module_path/$project");
             exec("rm -r $users_home_directory/.drush/drush-tmp");
-            exec("drush updb -y");
+            backdrop_command_updatedb();
             drush_print_r("\n\tYou can retrieve your old \033[1m$project\033[0m files, should you need
-            to, from: $users_home_directory/.drush/$site_name-$project-$module_full_version");
+            to, from: $users_home_directory/drush-backups/$site_name/$timestamp/modules/$project-$module_full_version");
             if (file_exists("$module_path/$project")) {
               drush_print_r("\t\e[32mSuccess\033[0m: Project \033[1m$project\033[0m updated to $proposed_version.");
             }
@@ -439,7 +458,7 @@ function backdrop_command_pm_update() {
         }
       }
       else {
-        drush_print_r("\n\t\e[33mWARNING\033[0m: There is no project \e[1m$project\033[0m intalled on your backdrop site.");
+        drush_print_r("\n\t\e[33mWARNING\033[0m: There is no project \e[1m$project\033[0m installed on your backdrop site.");
         drush_print_r("\tNo action taken.\n");
       }
     } // end of drush up $project

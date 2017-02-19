@@ -81,6 +81,21 @@ function backdrop_drush_command_alter(&$command) {
     case 'fix-permissions':
       $backdrop_command = 'fix-permissions';
       break;
+    case 'user-password':
+      $backdrop_command = 'backdrop-user-password';
+      break;
+    case 'config-export':
+      $backdrop_command = 'backdrop-config-export';
+      break;
+    case 'config-import':
+    case 'backdrop-config-import':
+      $backdrop_command = 'backdrop-config-import';
+      break;
+    case 'fix-permissions':
+      $backdrop_command = 'fix-permissions';
+    case 'site-install':
+      $backdrop_command = 'backdrop-site-install';
+      break;
   }
 
   // Commands that work with Backdrop with no adjustments.
