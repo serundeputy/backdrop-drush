@@ -47,7 +47,7 @@ script:
   # - kbox start -- -d
 
   # Run Drush to test if we can bootstrap the site
-  - cd public
+  - cd /var/www/backdrop
   # - kbox drush updatedb -y
   # - kbox rr -y
   # - kbox drush features-revert-all -y
