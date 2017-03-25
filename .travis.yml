@@ -20,7 +20,8 @@ before_install:
 
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
   # Travis CI currently, so we have to locate and enable it manually.
-  - sudo cp $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf.default $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf
+  # - sudo cp $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf.default $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf
+  - sudo cp build/www.conf ~/.phpenv/versions/$(phpenv version-name)/etc/php-fpm.d/
   - $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/sbin/php-fpm
 
   # Import the PHP configuration.
@@ -48,7 +49,7 @@ before_install:
   - cd /var/www
   - drush dlb backdrop --path="backdrop"
   - cd backdrop
-  - drush si --db-url="mysql://backdrop:backdrop@localhost/backdrop" -y
+  - drush si --db-url="mysql://travis:@localhost/backdrop" -y
 
   # Sanity check
   - drush --version
