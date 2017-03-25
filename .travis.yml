@@ -1,0 +1,56 @@
+language: php
+php:
+  - '5.6'
+  - '7.0'
+  - '7.1'
+services:
+  - docker
+# env:
+#   global:
+#     secure: "MSwQ/ihK6PzmMScMw2J+3T3EwAv/F65Mr+2fXdnGETKLf3GE6p5xeZmOLSah+rYg94z8osXuyOwX0bIBjyJlmsyf9qtDrbEzk5VU5ZrcAG/zf2o7YX2N2wP3Ptr6gR8t87S0Zzczcvpn8OXw2cRBpSUJVwojIK4Zhj10O39IGOVytcvAjZW9zUGsS4iJSF94kaDTlWA9UxGU3e7wo0KxkBDsOQFx2YLXI+vyV1VGB2XCz0wCheDSC9Catq9USGuKGAovkvrKwRH9UgICdS7SVdRBQyevLRbc/5Be4Cp63PK2604BKdy05MoOAUPSOOF1igG0HJH+f7MfmDWlHK5HHeFt89HFWvZFAIrU86Q9bnqJmzqN3dM4cjLguR/3nS96LpS2Mtou9yEj0fDBnl5qmtzi8cTbxkvVNT2dp3bWwn04L1t/XYm7T/jSCCxmfc1E27B3b7c83KWF3Ok1ANgj0b1eumKMKrUDt3HvWey+UNYrt8s8zjzLk6zIo0VsAm7VSon4QYKs+vwC6KKcTG/knc70Y9vNJn0JRKKt0kJnXkdTdVHYiZDPmtoTK2y/8AT/+mHe478SkQqGmtPuBRPwyxd+5xe65yYQuYlrOncopyi6LuLPX+SSU46SCyGOAc1Zzf0C1Teeg1Cpb0yeTa4MwDaoUz/74NaAdCAjf5yQlPY="
+before_install:
+
+  # Install Drush
+  - mkdir -p code
+  - git clone https://github.com/drush-ops/drush.git code/drush
+  - cd code/drush
+  - git checkout 8.x
+  - composer install
+
+  # Symlink to drush executable
+  - ln -s ~/code/drush/drush /usr/local/bin/drush
+
+  # Install Backdrop Drush Extension
+  - cd commands
+  - git clone https://github.com/backdrop-contrib/drush.git backdrop
+
+  # Install Backdrop
+  - cd /var/www
+  - drush dlb backdrop --path="backdrop"
+  - cd backdrop
+  - drush si --db-url="mysql://root:pass@localhost/backdrop" -y
+
+  # Sanity check
+  - drush --version
+
+install:
+
+  # Install composer deps
+  - composer install
+
+script:
+
+  # # Run code and styling
+  # - composer test
+  #
+  # # Test our build
+  # - kbox start -- -d
+
+  # Run Drush to test if we can bootstrap the site
+  - cd public
+  # - kbox drush updatedb -y
+  # - kbox rr -y
+  # - kbox drush features-revert-all -y
+  # - kbox drush features-revert-all -y
+  - drush status | grep Successful
+  - drush cc all | grep "'all' cache was cleared. "
