@@ -21,7 +21,7 @@ before_install:
   # Start PHP-FPM. There is no process manager available to start PHP-FPM on
   # Travis CI currently, so we have to locate and enable it manually.
   # - sudo cp $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf.default $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.conf
-  - sudo cp build/www.conf ~/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.d/php-fpm.conf
+  - sudo cp build/www.conf $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/etc/php-fpm.d/php-fpm.conf
   - $HOME/.phpenv/versions/`php -r "print PHP_VERSION;"`/sbin/php-fpm
 
   # Import the PHP configuration.
