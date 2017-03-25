@@ -18,7 +18,7 @@ before_install:
   - composer install
 
   # Symlink to drush executable
-  - ln -s ~/code/drush/drush /usr/local/bin/drush
+  - sudo ln -s ~/code/drush/drush /usr/local/bin/drush
 
   # Install Backdrop Drush Extension
   - cd commands
